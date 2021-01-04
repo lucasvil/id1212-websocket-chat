@@ -1,3 +1,10 @@
+# Project files
+.classpath
+.project
+.vscode
+.settings
+.mvn
+
 # Compiled class file
 *.class
 
