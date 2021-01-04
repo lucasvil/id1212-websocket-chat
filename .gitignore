@@ -4,6 +4,7 @@
 .vscode
 .settings
 .mvn
+target
 
 # Compiled class file
 *.class
