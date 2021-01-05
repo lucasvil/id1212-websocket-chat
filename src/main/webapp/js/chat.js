@@ -31,6 +31,7 @@ function sendMsg(from, text) {
 
 function registration() {
     let userName = document.getElementById("userName").value;
+    document.cookie = "username=" + userName;
     $.get(url + "/registration/" + userName, function (response) {
         connectToChat(userName);
     }).fail(function (error) {
@@ -53,20 +54,44 @@ function selectUser(userName) {
     $('#selectedUserId').append('Chat with ' + userName);
 }
 
+function sendFile() {
+    
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
 function fetchAll() {
+    let userName = getCookie("username");
     $.get(url + "/fetchAllUsers", function (response) {
         let users = response;
         let usersTemplateHTML = "";
+        console.log(userName);
         for (let i = 0; i < users.length; i++) {
-            usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectUser(\'' + users[i] + '\')"><li class="clearfix">\n' +
-                '                <div class="about">\n' +
-                '                <img src="../images/gurka.jpeg" width="55px" height="55px" alt="avatar" />\n' +
-                '                    <div id="userNameAppender_' + users[i] + '" class="name">' + users[i] + '</div>\n' +
-                '                    <div class="status">\n' +
-                '                        <i class="fa fa-circle offline"></i>\n' +
-                '                    </div>\n' +
-                '                </div>\n' +
-                '            </li></a>';
+            if(!(userName==users[i])) {
+                usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectUser(\'' + users[i] + '\')"><li class="clearfix">\n' +
+                    '                <div class="about">\n' +
+                    '                <img src="../images/gurka.jpeg" width="55px" height="55px" alt="avatar" />\n' +
+                    '                    <div id="userNameAppender_' + users[i] + '" class="name">' + users[i] + '</div>\n' +
+                    '                    <div class="status">\n' +
+                    '                        <i class="fa fa-circle offline"></i>\n' +
+                    '                    </div>\n' +
+                    '                </div>\n' +
+                    '            </li></a>';
+            }
         }
         $('#usersList').html(usersTemplateHTML);
     });

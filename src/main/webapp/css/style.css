@@ -35,6 +35,7 @@ body {
     background: #6A6C75;
     width: 90%;
     font-size: 14px;
+    margin-bottom: 8px;
 }
 
 .people-list .fa-search {
@@ -58,10 +59,19 @@ body {
 .people-list .about {
     float: left;
     margin-top: 8px;
+    color: #D8DADF;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .people-list .about {
     padding-left: 8px;
+}
+
+.people-list .name {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .people-list .status {
