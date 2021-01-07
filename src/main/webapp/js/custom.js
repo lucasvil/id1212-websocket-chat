@@ -1,5 +1,7 @@
 let $chatHistory;
-let $button;
+let $sendButton;
+let $uploadButton;
+let $file;
 let $textarea;
 let $chatHistoryList;
 
@@ -9,14 +11,17 @@ function init() {
 }
 
 function bindEvents() {
-    $button.on('click', addMessage.bind(this));
+    $sendButton.on('click', addMessage.bind(this));
+    $uploadButton.on('click', addFile.bind(this));
     $textarea.on('keyup', addMessageEnter.bind(this));
 }
 
 function cacheDOM() {
     $chatHistory = $('.chat-history');
-    $button = $('#sendBtn');
+    $sendButton = $('#sendBtn');
+    $uploadButton = $('#uploadBtn');
     $textarea = $('#message-to-send');
+    $file = $('#file');
     $chatHistoryList = $chatHistory.find('ul');
 }
 
@@ -65,6 +70,27 @@ function getCurrentTime() {
 
 function addMessage() {
     sendMessage($textarea.val());
+}
+
+function addFile() {
+    sendFile($file);
+}
+
+function sendFile(path) {
+    var template = Handlebars.compile($("#message-template").html());
+    var username = $('#userName').val();
+    //var f = new File([""], path, { type: "image/png, image/jpeg" });
+    console.log(path);
+    uploadFile(username, 'FILE');
+    scrollToBottom();
+    var context = {
+        messageOutput: 'FILE',
+        time: getCurrentTime(),
+        toUserName: selectedUser
+    };
+
+    $chatHistoryList.append(template(context));
+    scrollToBottom();
 }
 
 function addMessageEnter(event) {

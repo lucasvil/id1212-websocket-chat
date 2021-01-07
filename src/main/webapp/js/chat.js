@@ -23,9 +23,16 @@ function connectToChat(userName) {
 }
 
 function sendMsg(from, text) {
-    stompClient.send("/app/chat/" + selectedUser, {}, JSON.stringify({
+    stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
         fromLogin: from,
         message: text
+    }));
+}
+
+function uploadFile(from, file) {
+    stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
+        from: from,
+        file: file
     }));
 }
 
@@ -54,25 +61,21 @@ function selectUser(userName) {
     $('#selectedUserId').append('Chat with ' + userName);
 }
 
-function sendFile() {
-    
-}
-
 function getCookie(cname) {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
     var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
     }
     return "";
-  }
+}
 
 function fetchAll() {
     let userName = getCookie("username");
@@ -81,7 +84,7 @@ function fetchAll() {
         let usersTemplateHTML = "";
         console.log(userName);
         for (let i = 0; i < users.length; i++) {
-            if(!(userName==users[i])) {
+            if (!(userName == users[i])) {
                 usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectUser(\'' + users[i] + '\')"><li class="clearfix">\n' +
                     '                <div class="about">\n' +
                     '                <img src="../images/gurka.jpeg" width="55px" height="55px" alt="avatar" />\n' +
