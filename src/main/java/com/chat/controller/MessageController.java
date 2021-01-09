@@ -17,7 +17,7 @@ public class MessageController {
     private SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/chat/msg/{to}")
-    public void sendMessage(@DestinationVariable String to, MessageModel message, byte[] base64) {
+    public void sendMessage(@DestinationVariable String to, MessageModel message) {
         System.out.println("handling send message: " + message + " to: " + to);
         boolean isExists = UserStorage.getInstance().getUsers().contains(to);
         if (isExists) {
@@ -26,10 +26,8 @@ public class MessageController {
     }
 
     @MessageMapping("/chat/file/{to}")
-    public void sendFile(@DestinationVariable String to, FileModel file, byte[] base64) {
+    public void sendFile(@DestinationVariable String to, FileModel file) {
         System.out.println("handling send file to: " + to);
-        System.out.println(base64.length);
-        file.setBase64(base64);
         boolean isExists = UserStorage.getInstance().getUsers().contains(to);
         if (isExists) {
             simpMessagingTemplate.convertAndSend("/topic/messages/" + to, file);

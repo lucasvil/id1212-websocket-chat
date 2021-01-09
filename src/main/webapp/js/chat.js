@@ -36,7 +36,8 @@ function uploadFile(from, file, base64) {
     stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
         from: from,
         file: file,
-    }), base64);
+        base64: base64
+    }));
 }
 
 function registration() {
