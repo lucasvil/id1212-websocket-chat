@@ -138,6 +138,7 @@ ul {
     padding-left: 6px;
 }
 
+
 .chat .chat-history .message {
     color: white;
     padding: 18px 20px;
@@ -176,6 +177,9 @@ ul {
     left: 93%;
 }
 
+.chat .chat-history .other-message .message-image{
+    width: 100%;
+}
 .chat .chat-message {
     padding: 30px;
 }
@@ -189,7 +193,7 @@ ul {
     border-radius: 5px;
     resize: none;
 }
-
+.chat .chat-im
 .chat .chat-message .fa-file-o, .chat .chat-message .fa-file-image-o {
     font-size: 16px;
     color: gray;

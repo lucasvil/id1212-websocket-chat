@@ -3,7 +3,7 @@ package com.chat.model;
 public class MessageModel {
 
     private String message;
-    private String fromLogin;
+    private String from;
 
     public String getMessage() {
         return message;
@@ -13,16 +13,16 @@ public class MessageModel {
         this.message = message;
     }
 
-    public String getFromLogin() {
-        return fromLogin;
+    public String getFrom() {
+        return from;
     }
 
-    public void setFromLogin(String fromLogin) {
-        this.fromLogin = fromLogin;
+    public void setFrom(String from) {
+        this.from = from;
     }
 
     @Override
     public String toString() {
-        return "MessageModel{" + "message='" + message + '\'' + ", fromLogin='" + fromLogin + '\'' + '}';
+        return "MessageModel{" + "message='" + message + '\'' + ", fromLogin='" + from + '\'' + '}';
     }
 }

@@ -25,20 +25,69 @@ function cacheDOM() {
     $chatHistoryList = $chatHistory.find('ul');
 }
 
-function render(message, userName) {
+function renderResponse(message, username) {
     scrollToBottom();
     // responses
     var templateResponse = Handlebars.compile($("#message-response-template").html());
     var contextResponse = {
         response: message,
         time: getCurrentTime(),
-        userName: userName
+        userName: username
     };
 
     setTimeout(function () {
         $chatHistoryList.append(templateResponse(contextResponse));
         scrollToBottom();
     }.bind(this), 1500);
+}
+
+function renderImageResponse(fname, username, enc) {
+    scrollToBottom();
+    // responses
+    var templateResponse = Handlebars.compile($("#message-image-response-template").html());
+    var contextResponse = {
+        response: fname,
+        time: getCurrentTime(),
+        userName: username,
+        image: enc
+    };
+
+    setTimeout(function () {
+        $chatHistoryList.append(templateResponse(contextResponse));
+        scrollToBottom();
+    }.bind(this), 1500);
+}
+
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+function sendFile(element) {
+    let username = $('#userName').val();
+    var file = element[0].files[0];
+    var fname = file.name;
+    getBase64(file).then(enc => {
+        console.log(enc);
+        uploadFile(username, fname, enc);
+        scrollToBottom();
+        if (fname.trim() !== '') {
+            var template = Handlebars.compile($("#message-image-template").html());
+            var context = {
+                messageOutput: fname,
+                time: getCurrentTime(),
+                toUserName: selectedUser,
+                image: enc
+            };
+
+            $chatHistoryList.append(template(context));
+            scrollToBottom();
+        }
+    })
 }
 
 function sendMessage(message) {
@@ -74,23 +123,6 @@ function addMessage() {
 
 function addFile() {
     sendFile($file);
-}
-
-function sendFile(path) {
-    var template = Handlebars.compile($("#message-template").html());
-    var username = $('#userName').val();
-    //var f = new File([""], path, { type: "image/png, image/jpeg" });
-    console.log(path);
-    uploadFile(username, 'FILE');
-    scrollToBottom();
-    var context = {
-        messageOutput: 'FILE',
-        time: getCurrentTime(),
-        toUserName: selectedUser
-    };
-
-    $chatHistoryList.append(template(context));
-    scrollToBottom();
 }
 
 function addMessageEnter(event) {

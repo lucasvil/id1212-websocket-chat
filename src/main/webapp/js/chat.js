@@ -11,11 +11,14 @@ function connectToChat(userName) {
         console.log("connected to: " + frame);
         stompClient.subscribe("/topic/messages/" + userName, function (response) {
             let data = JSON.parse(response.body);
-            if (selectedUser === data.fromLogin) {
-                render(data.message, data.fromLogin);
+            if (selectedUser === data.from) {
+                if (data.message)
+                    renderResponse(data.message, data.from);
+                else if (data.file)
+                    renderImageResponse(data.file, data.from, data.base64);
             } else {
-                newMessages.set(data.fromLogin, data.message);
-                $('#userNameAppender_' + data.fromLogin).append('<span id="newMessage_' + data.fromLogin + '" style="color: red">+1</span>');
+                newMessages.set(data.from, data.message);
+                $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+1</span>');
             }
         });
     });
@@ -24,16 +27,16 @@ function connectToChat(userName) {
 
 function sendMsg(from, text) {
     stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
-        fromLogin: from,
+        from: from,
         message: text
     }));
 }
 
-function uploadFile(from, file) {
+function uploadFile(from, file, base64) {
     stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
         from: from,
-        file: file
-    }));
+        file: file,
+    }), base64);
 }
 
 function registration() {

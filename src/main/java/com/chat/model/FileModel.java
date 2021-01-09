@@ -3,6 +3,7 @@ package com.chat.model;
 public class FileModel {
   private String file;
   private String from;
+  private byte[] base64;
 
   public String getFile() {
     return this.file;
@@ -20,8 +21,16 @@ public class FileModel {
     this.from = from;
   }
 
+  public void setBase64(byte[] base64) {
+    this.base64 = base64;
+  }
+
+  public byte[] getBase64() {
+    return this.base64;
+  }
+
   @Override
   public String toString() {
-    return "FileModel{file='" + file + '\'' + ", from='" + from + '\'' + "}";
+    return "FileModel{file='" + file + '\'' + ", from='" + from + '\'' + ", base64='" + base64[0] + '\'' + "}";
   }
 }
