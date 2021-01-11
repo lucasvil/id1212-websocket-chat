@@ -27,6 +27,8 @@ function cacheDOM() {
 
 function renderResponse(message, username) {
     scrollToBottom();
+    console.log(message);
+    console.log(username);
     // responses
     var templateResponse = Handlebars.compile($("#message-response-template").html());
     var contextResponse = {
