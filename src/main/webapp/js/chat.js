@@ -2,7 +2,7 @@ const url = 'http://localhost:8080';
 let stompClient;
 let selectedUser;
 let messageCounter = 0;
-let newMessages = new Map();
+let newMessages = new Array();
 
 function connectToChat(userName) {
     console.log("connecting to chat...")
@@ -18,11 +18,12 @@ function connectToChat(userName) {
                 else if (data.file)
                     renderImageResponse(data.file, data.from, data.base64);
             } else {
-                newMessages.set(messageCounter++,data);
+                newMessages.push(data);
                 console.log(newMessages);
                 let element = document.getElementById("newMessage_" + data.from);
-                if(element)
+                if (element)
                     element.parentNode.removeChild(element);
+                messageCounter++;
                 $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+' + messageCounter + '</span>');
             }
         });
@@ -64,16 +65,19 @@ function selectUser(userName) {
     if (isNew) {
         let element = document.getElementById("newMessage_" + userName);
         element.parentNode.removeChild(element);
-        for(let i = 0; i < messageCounter; i++) {
-            if(newMessages.get(i).message){
-                renderResponse(newMessages.get(i).message, newMessages.get(i).from);
-            } else if(newMessages.get(i).file) {
-                renderImageResponse(newMessages.get(i).file, newMessages.get(i).from, newMessages.get(i).base64);
+        for (let i = 0; i < messageCounter; i++) {
+            if (userName == newMessages[i].from) {
+                if (newMessages[i].message) {
+                    renderResponse(newMessages[i].message, newMessages[i].from);
+                } else if (newMessages[i].file) {
+                    renderImageResponse(newMessages[i].file, newMessages[i].from, newMessages[i].base64);
+                }
+                newMessages.splice(i, 1);
+                messageCounter--;
+                console.log(newMessages);
             }
         }
     }
-    messageCounter=0;
-    newMessages = new Map();
     $('#selectedUserId').html('');
     $('#selectedUserId').append('Chat with ' + userName);
 }
