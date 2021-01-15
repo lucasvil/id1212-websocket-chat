@@ -1,8 +1,6 @@
 const url = 'http://localhost:8080';
 let stompClient;
 let selectedUser;
-let messageCounter = 0;
-let newMessages = new Array();
 
 function connectToChat(userName) {
     console.log("connecting to chat...")
@@ -12,19 +10,27 @@ function connectToChat(userName) {
         console.log("connected to: " + frame);
         stompClient.subscribe("/topic/messages/" + userName, function (response) {
             let data = JSON.parse(response.body);
+            let room = findChatRoom(userName, data.from);
+            if (room == null) {
+                console.log(room);
+                addChatRoom(userName, data.from)
+            }
             if (selectedUser === data.from) {
-                if (data.message)
+                if (data.message) {
+                    // add to chatroom object
+                    appendOtherHistory(userName, data.from, data.message);
                     renderResponse(data.message, data.from);
+                }
                 else if (data.file)
+                    // add to chatroom object
                     renderImageResponse(data.file, data.from, data.base64);
             } else {
-                newMessages.push(data);
-                console.log(newMessages);
+                appendOtherHistory(userName, data.from, data.message);
                 let element = document.getElementById("newMessage_" + data.from);
                 if (element)
                     element.parentNode.removeChild(element);
-                messageCounter++;
-                $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+' + messageCounter + '</span>');
+                let count = incrementUnread(userName, data.from);
+                $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+' + count + '</span>');
             }
         });
     });
@@ -32,6 +38,12 @@ function connectToChat(userName) {
 }
 
 function sendMsg(from, text) {
+    let room = findChatRoom(from, selectedUser);
+    if (room == null) {
+        console.log(room);
+        addChatRoom(from, selectedUser)
+    }
+    appendUserHistory(from, selectedUser, text);
     stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
         from: from,
         message: text
@@ -58,28 +70,52 @@ function registration() {
     })
 }
 
-function selectUser(userName) {
-    console.log("selecting users: " + userName);
-    selectedUser = userName;
-    let isNew = document.getElementById("newMessage_" + userName) !== null;
-    if (isNew) {
-        let element = document.getElementById("newMessage_" + userName);
-        element.parentNode.removeChild(element);
-        for (let i = 0; i < messageCounter; i++) {
-            if (userName == newMessages[i].from) {
-                if (newMessages[i].message) {
-                    renderResponse(newMessages[i].message, newMessages[i].from);
-                } else if (newMessages[i].file) {
-                    renderImageResponse(newMessages[i].file, newMessages[i].from, newMessages[i].base64);
-                }
-                newMessages.splice(i, 1);
-                messageCounter--;
-                console.log(newMessages);
+function selectUser(select) {
+    console.log("selecting users: " + select);
+    let user = getCookie("username");
+    selectedUser = select;
+
+    clearHistory();
+    readUnread(user, selectedUser);
+
+    let room = findChatRoom(user, selectedUser);
+    if (room == null) {
+        console.log(room);
+        addChatRoom(user, selectedUser)
+        room = findChatRoom(user, selectedUser);
+    }
+
+    let sent = room.user.history;
+    let recieved = room.other.history;
+    let scount = 0;
+    let rcount = 0;
+
+    for (let i = 0; i < (sent.length + recieved.length); i++) {
+        if (sent.length == 0) {
+            renderResponse(recieved[rcount].text, user);
+            rcount++;
+        } else if (recieved.length == 0) {
+            renderResponse(sent[scount].text, user);
+            scount++;
+        } else {
+            if (sent[scount].time > recieved[rcount].time) {
+                renderResponse(sent[scount].text, user);
+                scount++;
+            } else {
+                renderResponse(recieved[rcount].text, user);
+                rcount++;
             }
         }
     }
+
+    let isNew = document.getElementById("newMessage_" + selectedUser) !== null;
+    if (isNew) {
+        let element = document.getElementById("newMessage_" + selectedUser);
+        element.parentNode.removeChild(element);
+    }
+
     $('#selectedUserId').html('');
-    $('#selectedUserId').append('Chat with ' + userName);
+    $('#selectedUserId').append('Chat with ' + selectedUser);
 }
 
 function getCookie(cname) {

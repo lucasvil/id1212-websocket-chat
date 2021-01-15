@@ -27,8 +27,6 @@ function cacheDOM() {
 
 function renderResponse(message, username) {
     scrollToBottom();
-    console.log(message);
-    console.log(username);
     // responses
     var templateResponse = Handlebars.compile($("#message-response-template").html());
     var contextResponse = {
@@ -58,6 +56,10 @@ function renderImageResponse(fname, username, enc) {
         $chatHistoryList.append(templateResponse(contextResponse));
         scrollToBottom();
     }.bind(this), 1500);
+}
+
+function clearHistory() {
+    $chatHistoryList.remove();
 }
 
 function getBase64(file) {
@@ -109,6 +111,10 @@ function sendMessage(message) {
         scrollToBottom();
         $textarea.val('');
     }
+}
+
+function clearHistory() {
+    $chatHistoryList.html('');
 }
 
 function scrollToBottom() {
