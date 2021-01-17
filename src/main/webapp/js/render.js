@@ -27,23 +27,18 @@ function cacheDOM() {
 
 function renderResponse(message, username) {
     scrollToBottom();
-    // responses
     var templateResponse = Handlebars.compile($("#message-response-template").html());
     var contextResponse = {
-        response: message,
-        time: getCurrentTime(),
+        response: message.text,
+        time: message.time.toLocaleString(),
         userName: username
     };
-
-    setTimeout(function () {
-        $chatHistoryList.append(templateResponse(contextResponse));
-        scrollToBottom();
-    }.bind(this), 1500);
+    $chatHistoryList.append(templateResponse(contextResponse));
+    scrollToBottom();
 }
 
 function renderImageResponse(fname, username, enc) {
     scrollToBottom();
-    // responses
     var templateResponse = Handlebars.compile($("#message-image-response-template").html());
     var contextResponse = {
         response: fname,
@@ -56,6 +51,22 @@ function renderImageResponse(fname, username, enc) {
         $chatHistoryList.append(templateResponse(contextResponse));
         scrollToBottom();
     }.bind(this), 1500);
+}
+
+function renderSend(message) {
+    scrollToBottom();
+    if (message.text.trim() !== '') {
+        var template = Handlebars.compile($("#message-template").html());
+        var context = {
+            messageOutput: message.text,
+            time: message.time.toLocaleString(),
+            toUserName: selectedUser
+        };
+
+        $chatHistoryList.append(template(context));
+        scrollToBottom();
+        $textarea.val('');
+    }
 }
 
 function clearHistory() {
@@ -76,7 +87,6 @@ function sendFile(element) {
     var file = element[0].files[0];
     var fname = file.name;
     getBase64(file).then(enc => {
-        console.log(enc);
         uploadFile(username, fname, enc);
         scrollToBottom();
         if (fname.trim() !== '') {
@@ -94,23 +104,14 @@ function sendFile(element) {
     })
 }
 
-function sendMessage(message) {
+function sendMessage(text) {
     let username = $('#userName').val();
-    console.log(username)
-    sendMsg(username, message);
-    scrollToBottom();
-    if (message.trim() !== '') {
-        var template = Handlebars.compile($("#message-template").html());
-        var context = {
-            messageOutput: message,
-            time: getCurrentTime(),
-            toUserName: selectedUser
-        };
-
-        $chatHistoryList.append(template(context));
-        scrollToBottom();
-        $textarea.val('');
+    message = {
+        time: new Date(),
+        text: text,
     }
+    sendMsg(username, message);
+    renderSend(message);
 }
 
 function clearHistory() {
@@ -122,7 +123,7 @@ function scrollToBottom() {
 }
 
 function getCurrentTime() {
-    return new Date().toLocaleTimeString().replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, "$1$3");
+    return new Date().toLocaleTimeString();
 }
 
 function addMessage() {

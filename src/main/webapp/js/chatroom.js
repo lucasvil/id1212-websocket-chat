@@ -25,25 +25,23 @@ function findChatRoom(user1, user2) {
   return r;
 }
 
-function appendUserHistory(user, other, text) {
+function appendUserHistory(user, other, message) {
   let room = findChatRoom(user, other);
-  let message = {
-    time: getCurrentTime(),
-    text: text,
-  }
   if (room != null) {
     room.user.history.push(message);
+    return message;
   }
 }
 
 function appendOtherHistory(user, other, text) {
   let room = findChatRoom(user, other);
   let message = {
-    time: getCurrentTime(),
+    time: new Date(),
     text: text,
   }
   if (room != null) {
     room.other.history.push(message);
+    return message;
   }
 }
 

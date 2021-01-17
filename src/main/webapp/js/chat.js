@@ -18,8 +18,8 @@ function connectToChat(userName) {
             if (selectedUser === data.from) {
                 if (data.message) {
                     // add to chatroom object
-                    appendOtherHistory(userName, data.from, data.message);
-                    renderResponse(data.message, data.from);
+                    message = appendOtherHistory(userName, data.from, data.message);
+                    renderResponse(message, data.from);
                 }
                 else if (data.file)
                     // add to chatroom object
@@ -37,17 +37,17 @@ function connectToChat(userName) {
     fetchAll();
 }
 
-function sendMsg(from, text) {
+function sendMsg(from, message) {
     let room = findChatRoom(from, selectedUser);
     if (room == null) {
-        console.log(room);
         addChatRoom(from, selectedUser)
     }
-    appendUserHistory(from, selectedUser, text);
+    appendUserHistory(from, selectedUser, message);
     stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
         from: from,
-        message: text
+        message: message.text
     }));
+    return message;
 }
 
 function uploadFile(from, file, base64) {
@@ -91,18 +91,18 @@ function selectUser(select) {
     let rcount = 0;
 
     for (let i = 0; i < (sent.length + recieved.length); i++) {
-        if (sent.length == 0) {
-            renderResponse(recieved[rcount].text, user);
+        if (sent[scount] == undefined) {
+            renderResponse(recieved[rcount], user);
             rcount++;
-        } else if (recieved.length == 0) {
-            renderResponse(sent[scount].text, user);
+        } else if (recieved[rcount] == undefined) {
+            renderSend(sent[scount], user);
             scount++;
         } else {
-            if (sent[scount].time > recieved[rcount].time) {
-                renderResponse(sent[scount].text, user);
+            if (sent[scount].time < recieved[rcount].time) {
+                renderSend(sent[scount], user);
                 scount++;
             } else {
-                renderResponse(recieved[rcount].text, user);
+                renderResponse(recieved[rcount], user);
                 rcount++;
             }
         }
