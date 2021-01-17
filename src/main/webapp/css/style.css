@@ -6,6 +6,7 @@
 
 body {
     background: grey;
+    background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     font: 14px/20px "Lato", Arial, sans-serif;
     padding: 40px 0;
     color: white;
@@ -16,10 +17,12 @@ body {
     width: 750px;
     background: #444753;
     border-radius: 5px;
+    box-shadow: 5px 10px 8px #888888;
 }
 
 .people-list {
     width: 260px;
+    height: 100%;
     float: left;
 }
 
@@ -81,10 +84,11 @@ body {
 .chat {
     width: 490px;
     float: left;
-    background: #ffe6e6;
+    background: whitesmoke;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     color: #434651;
+    height: 100%;
 }
 
 .chat .chat-header {
@@ -125,8 +129,8 @@ ul {
 .chat .chat-history {
     padding: 30px 30px 20px;
     border-bottom: 2px solid white;
-    overflow-y: scroll;
     height: 575px;
+    overflow-y: scroll;
 }
 
 .chat .chat-history .message-data {

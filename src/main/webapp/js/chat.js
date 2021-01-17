@@ -12,13 +12,6 @@ function connectToChat(username) {
         console.log("connected to: " + frame);
         stompClient.subscribe("/topic/messages/" + username, function (response) {
             let data = JSON.parse(response.body);
-
-            // clean this up pls
-            let room = findChatRoom(username, data.from);
-            if (room == null) {
-                addChatRoom(username, data.from)
-            }
-
             let message = {
                 time: new Date(),
                 text: data.message,
@@ -47,12 +40,7 @@ function connectToChat(username) {
     fetchAll();
 }
 
-function sendMsg(from, message) {
-    // clean this up pls
-    let room = findChatRoom(from, selectedUser);
-    if (room == null) {
-        addChatRoom(from, selectedUser)
-    }
+function sendMessage(from, message) {
     appendUserHistory(from, selectedUser, message);
     stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
         from: from,
@@ -62,11 +50,6 @@ function sendMsg(from, message) {
 }
 
 function uploadFile(from, file) {
-    // clean this up pls
-    let room = findChatRoom(from, selectedUser);
-    if (room == null) {
-        addChatRoom(from, selectedUser)
-    }
     appendUserHistory(from, selectedUser, file);
     stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
         from: from,
@@ -77,8 +60,8 @@ function uploadFile(from, file) {
 
 function registration() {
     let userName = document.getElementById("userName").value;
-    document.cookie = "username=" + userName;
     $.get(url + "/registration/" + userName, function (response) {
+        document.cookie = "username=" + userName;
         connectToChat(userName);
     }).fail(function (error) {
         if (error.status === 400) {
@@ -94,15 +77,7 @@ function selectUser(select) {
 
     clearHistory();
     readUnread(user, selectedUser);
-
-    // clean this up pls
-    let room = findChatRoom(user, selectedUser);
-    if (room == null) {
-        console.log(room);
-        addChatRoom(user, selectedUser)
-        room = findChatRoom(user, selectedUser);
-    }
-    renderChatroom(room);
+    renderChatroom(findChatRoom(user, selectedUser));
 
     let isNew = document.getElementById("newMessage_" + selectedUser) !== null;
     if (isNew) {
@@ -136,7 +111,6 @@ function fetchAll() {
     $.get(url + "/fetchAllUsers", function (response) {
         let users = response;
         let usersTemplateHTML = "";
-        console.log(userName);
         for (let i = 0; i < users.length; i++) {
             if (!(userName == users[i])) {
                 usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectUser(\'' + users[i] + '\')"><li class="clearfix">\n' +

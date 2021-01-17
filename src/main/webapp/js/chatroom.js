@@ -1,7 +1,7 @@
 let chatRooms = new Array();
 
 function addChatRoom(user, other) {
-  var chatRoom = {
+  var room = {
     user: {
       name: user,
       history: new Array(),
@@ -12,7 +12,8 @@ function addChatRoom(user, other) {
     },
     unreadMessages: 0,
   }
-  chatRooms.push(chatRoom);
+  chatRooms.push(room);
+  return room;
 }
 
 function findChatRoom(user1, user2) {
@@ -22,6 +23,8 @@ function findChatRoom(user1, user2) {
       r = room;
     }
   });
+  if (r == null)
+    r = addChatRoom(user1, user2);
   return r;
 }
 

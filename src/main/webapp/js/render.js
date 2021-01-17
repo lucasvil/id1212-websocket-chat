@@ -163,7 +163,7 @@ function handleSend(text) {
         time: new Date(),
         text: text,
     }
-    sendMsg(username, message);
+    sendMessage(username, message);
     renderSend(message);
 }
 
