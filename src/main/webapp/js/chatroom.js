@@ -29,19 +29,13 @@ function appendUserHistory(user, other, message) {
   let room = findChatRoom(user, other);
   if (room != null) {
     room.user.history.push(message);
-    return message;
   }
 }
 
-function appendOtherHistory(user, other, text) {
+function appendOtherHistory(user, other, message) {
   let room = findChatRoom(user, other);
-  let message = {
-    time: new Date(),
-    text: text,
-  }
   if (room != null) {
     room.other.history.push(message);
-    return message;
   }
 }
 

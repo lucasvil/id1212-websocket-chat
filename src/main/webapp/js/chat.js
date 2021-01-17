@@ -2,34 +2,44 @@ const url = 'http://localhost:8080';
 let stompClient;
 let selectedUser;
 
-function connectToChat(userName) {
+function connectToChat(username) {
     console.log("connecting to chat...")
     let socket = new SockJS(url + '/chat');
     stompClient = Stomp.over(socket);
+
     stompClient.connect({}, function (frame) {
+        // callback function
         console.log("connected to: " + frame);
-        stompClient.subscribe("/topic/messages/" + userName, function (response) {
+        stompClient.subscribe("/topic/messages/" + username, function (response) {
             let data = JSON.parse(response.body);
-            let room = findChatRoom(userName, data.from);
+
+            // clean this up pls
+            let room = findChatRoom(username, data.from);
             if (room == null) {
-                console.log(room);
-                addChatRoom(userName, data.from)
+                addChatRoom(username, data.from)
             }
+
+            let message = {
+                time: new Date(),
+                text: data.message,
+                base64: undefined
+            };
+            if (data.file) {
+                message.base64 = data.base64;
+                message.text = data.file;
+            }
+            appendOtherHistory(username, data.from, message);
+
             if (selectedUser === data.from) {
-                if (data.message) {
-                    // add to chatroom object
-                    message = appendOtherHistory(userName, data.from, data.message);
+                if (data.message)
                     renderResponse(message, data.from);
-                }
                 else if (data.file)
-                    // add to chatroom object
-                    renderImageResponse(data.file, data.from, data.base64);
+                    renderImageResponse(message, data.from);
             } else {
-                appendOtherHistory(userName, data.from, data.message);
                 let element = document.getElementById("newMessage_" + data.from);
                 if (element)
                     element.parentNode.removeChild(element);
-                let count = incrementUnread(userName, data.from);
+                let count = incrementUnread(username, data.from);
                 $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+' + count + '</span>');
             }
         });
@@ -38,6 +48,7 @@ function connectToChat(userName) {
 }
 
 function sendMsg(from, message) {
+    // clean this up pls
     let room = findChatRoom(from, selectedUser);
     if (room == null) {
         addChatRoom(from, selectedUser)
@@ -50,11 +61,17 @@ function sendMsg(from, message) {
     return message;
 }
 
-function uploadFile(from, file, base64) {
+function uploadFile(from, file) {
+    // clean this up pls
+    let room = findChatRoom(from, selectedUser);
+    if (room == null) {
+        addChatRoom(from, selectedUser)
+    }
+    appendUserHistory(from, selectedUser, file);
     stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
         from: from,
-        file: file,
-        base64: base64
+        file: file.text,
+        base64: file.base64
     }));
 }
 
@@ -78,35 +95,14 @@ function selectUser(select) {
     clearHistory();
     readUnread(user, selectedUser);
 
+    // clean this up pls
     let room = findChatRoom(user, selectedUser);
     if (room == null) {
         console.log(room);
         addChatRoom(user, selectedUser)
         room = findChatRoom(user, selectedUser);
     }
-
-    let sent = room.user.history;
-    let recieved = room.other.history;
-    let scount = 0;
-    let rcount = 0;
-
-    for (let i = 0; i < (sent.length + recieved.length); i++) {
-        if (sent[scount] == undefined) {
-            renderResponse(recieved[rcount], user);
-            rcount++;
-        } else if (recieved[rcount] == undefined) {
-            renderSend(sent[scount], user);
-            scount++;
-        } else {
-            if (sent[scount].time < recieved[rcount].time) {
-                renderSend(sent[scount], user);
-                scount++;
-            } else {
-                renderResponse(recieved[rcount], user);
-                rcount++;
-            }
-        }
-    }
+    renderChatroom(room);
 
     let isNew = document.getElementById("newMessage_" + selectedUser) !== null;
     if (isNew) {
@@ -117,6 +113,7 @@ function selectUser(select) {
     $('#selectedUserId').html('');
     $('#selectedUserId').append('Chat with ' + selectedUser);
 }
+
 
 function getCookie(cname) {
     var name = cname + "=";
