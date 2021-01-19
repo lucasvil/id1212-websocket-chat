@@ -2,6 +2,7 @@ package com.chat.controller;
 
 import com.chat.model.FileModel;
 import com.chat.model.MessageModel;
+import com.chat.storage.RoomStorage;
 import com.chat.storage.UserStorage;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class MessageController {
     @MessageMapping("/chat/msg/{to}")
     public void sendMessage(@DestinationVariable String to, MessageModel message) {
         System.out.println("handling send message: " + message + " to: " + to);
-        boolean isExists = UserStorage.getInstance().getUsers().contains(to);
+        boolean isExists = RoomStorage.getInstance().getRooms().contains(to);
         if (isExists) {
             simpMessagingTemplate.convertAndSend("/topic/messages/" + to, message);
         }
@@ -28,7 +29,7 @@ public class MessageController {
     @MessageMapping("/chat/file/{to}")
     public void sendFile(@DestinationVariable String to, FileModel file) {
         System.out.println("handling send file to: " + to);
-        boolean isExists = UserStorage.getInstance().getUsers().contains(to);
+        boolean isExists = RoomStorage.getInstance().getRooms().contains(to);
         if (isExists) {
             simpMessagingTemplate.convertAndSend("/topic/messages/" + to, file);
         }

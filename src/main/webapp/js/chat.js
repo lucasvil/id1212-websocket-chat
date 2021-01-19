@@ -1,8 +1,9 @@
 const url = 'http://localhost:8080';
 let stompClient;
 let selectedUser;
+let selectedRoom;
 
-function connectToChat(username) {
+function connectToChat(chatroom) {
     console.log("connecting to chat...")
     let socket = new SockJS(url + '/chat');
     stompClient = Stomp.over(socket);
@@ -10,7 +11,7 @@ function connectToChat(username) {
     stompClient.connect({}, function (frame) {
         // callback function
         console.log("connected to: " + frame);
-        stompClient.subscribe("/topic/messages/" + username, function (response) {
+        stompClient.subscribe("/topic/messages/" + chatroom, function (response) {
             let data = JSON.parse(response.body);
             let message = {
                 time: new Date(),
@@ -21,19 +22,19 @@ function connectToChat(username) {
                 message.base64 = data.base64;
                 message.text = data.file;
             }
-            appendOtherHistory(username, data.from, message);
+            appendOtherHistory(chatroom, message);
 
-            if (selectedUser === data.from) {
+            if (selectedRoom === chatroom) {
                 if (data.message)
                     renderResponse(message, data.from);
                 else if (data.file)
                     renderImageResponse(message, data.from);
             } else {
-                let element = document.getElementById("newMessage_" + data.from);
+                let element = document.getElementById("newMessage_" + chatroom);
                 if (element)
                     element.parentNode.removeChild(element);
-                let count = incrementUnread(username, data.from);
-                $('#userNameAppender_' + data.from).append('<span id="newMessage_' + data.from + '" style="color: red">+' + count + '</span>');
+                let count = incrementUnread(chatroom);
+                $('#userNameAppender_' + chatroom).append('<span id="newMessage_' + chatroom + '" style="color: red">+' + count + '</span>');
             }
         });
     });
@@ -41,8 +42,8 @@ function connectToChat(username) {
 }
 
 function sendMessage(from, message) {
-    appendUserHistory(from, selectedUser, message);
-    stompClient.send("/app/chat/msg/" + selectedUser, {}, JSON.stringify({
+    appendUserHistory(selectedRoom, message);
+    stompClient.send("/app/chat/msg/" + selectedRoom, {}, JSON.stringify({
         from: from,
         message: message.text
     }));
@@ -50,8 +51,8 @@ function sendMessage(from, message) {
 }
 
 function uploadFile(from, file) {
-    appendUserHistory(from, selectedUser, file);
-    stompClient.send("/app/chat/file/" + selectedUser, {}, JSON.stringify({
+    appendUserHistory(selectedRoom, file);
+    stompClient.send("/app/chat/file/" + selectedRoom, {}, JSON.stringify({
         from: from,
         file: file.text,
         base64: file.base64
@@ -62,31 +63,37 @@ function registration() {
     let userName = document.getElementById("userName").value;
     $.get(url + "/registration/" + userName, function (response) {
         document.cookie = "username=" + userName;
-        connectToChat(userName);
     }).fail(function (error) {
         if (error.status === 400) {
-            alert("Login is already busy!")
+            alert("Login is already busy!");
         }
     })
 }
 
-function selectUser(select) {
-    console.log("selecting users: " + select);
-    let user = getCookie("username");
-    selectedUser = select;
+function createChatroom() {
+    let chatRoom = document.getElementById("userName").value;
+    $.get(url + "/chatroom/" + chatRoom, function (response) {
+        alert("Chatroom created");
+    }).fail(function (error) {
+        if(error.status === 400)
+            alert("Chatroom name is already busy!");
+    })
+}
 
+function selectRoom(select) {
+    selectedRoom = select;
     clearHistory();
-    readUnread(user, selectedUser);
-    renderChatroom(findChatRoom(user, selectedUser));
+    readUnread(selectedRoom);
+    renderChatroom(findChatRoom(selectedRoom));
 
-    let isNew = document.getElementById("newMessage_" + selectedUser) !== null;
+    let isNew = document.getElementById("newMessage_" + selectedRoom) !== null;
     if (isNew) {
-        let element = document.getElementById("newMessage_" + selectedUser);
+        let element = document.getElementById("newMessage_" + selectedRoom);
         element.parentNode.removeChild(element);
     }
-
+    connectToChat(selectedRoom);
     $('#selectedUserId').html('');
-    $('#selectedUserId').append('Chat with ' + selectedUser);
+    $('#selectedUserId').append('Chat with ' + selectedRoom);
 }
 
 
@@ -108,12 +115,12 @@ function getCookie(cname) {
 
 function fetchAll() {
     let userName = getCookie("username");
-    $.get(url + "/fetchAllUsers", function (response) {
+    $.get(url + "/fetchAllRooms", function (response) {
         let users = response;
         let usersTemplateHTML = "";
         for (let i = 0; i < users.length; i++) {
             if (!(userName == users[i])) {
-                usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectUser(\'' + users[i] + '\')"><li class="clearfix">\n' +
+                usersTemplateHTML = usersTemplateHTML + '<a href="#" onclick="selectRoom(\'' + users[i] + '\')"><li class="clearfix">\n' +
                     '                <div class="about">\n' +
                     '                <img src="../images/gurka.jpeg" width="55px" height="55px" alt="avatar" />\n' +
                     '                    <div id="userNameAppender_' + users[i] + '" class="name">' + users[i] + '</div>\n' +

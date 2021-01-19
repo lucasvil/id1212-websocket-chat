@@ -1,57 +1,56 @@
 let chatRooms = new Array();
 
-function addChatRoom(user, other) {
+function addChatRoom(name) {
   var room = {
     user: {
-      name: user,
       history: new Array(),
     },
     other: {
-      name: other,
       history: new Array(),
     },
     unreadMessages: 0,
+    name: name,
   }
   chatRooms.push(room);
   return room;
 }
 
-function findChatRoom(user1, user2) {
+function findChatRoom(name) {
   let r = null;
   chatRooms.map(room => {
-    if ((room.user.name == user1) && (room.other.name == user2)) {
+    if (room.name == name) {
       r = room;
     }
   });
   if (r == null)
-    r = addChatRoom(user1, user2);
+    r = addChatRoom(name);
   return r;
 }
 
-function appendUserHistory(user, other, message) {
-  let room = findChatRoom(user, other);
+function appendUserHistory(name, message) {
+  let room = findChatRoom(name);
   if (room != null) {
     room.user.history.push(message);
   }
 }
 
-function appendOtherHistory(user, other, message) {
-  let room = findChatRoom(user, other);
+function appendOtherHistory(name, message) {
+  let room = findChatRoom(name);
   if (room != null) {
     room.other.history.push(message);
   }
 }
 
-function incrementUnread(user, other) {
-  let room = findChatRoom(user, other);
+function incrementUnread(name) {
+  let room = findChatRoom(name);
   if (room != null) {
     room.unreadMessages++;
   }
   return room.unreadMessages;
 }
 
-function readUnread(user, other) {
-  let room = findChatRoom(user, other);
+function readUnread(name) {
+  let room = findChatRoom(name);
   if (room != null) {
     room.unreadMessages = 0;
   }

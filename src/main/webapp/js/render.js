@@ -141,7 +141,6 @@ function getBase64(file) {
 }
 
 /* event handlers */
-
 function handleUpload(element) {
     let username = $('#userName').val();
     var file = element[0].files[0];
